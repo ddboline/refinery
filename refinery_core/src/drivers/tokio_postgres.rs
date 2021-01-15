@@ -34,7 +34,7 @@ async fn query_applied_migrations(
 #[async_trait]
 impl<T> AsyncTransaction for T
 where
-    T: GenericClient,
+    T: GenericClient + Send + Sync,
 {
     type Error = PgError;
 
@@ -53,7 +53,7 @@ where
 #[async_trait]
 impl<T> AsyncQuery<Vec<Migration>> for T
 where
-    T: GenericClient,
+    T: GenericClient + Send + Sync,
 {
     async fn query(
         &mut self,
@@ -66,4 +66,4 @@ where
     }
 }
 
-impl<T: GenericClient> AsyncMigrate for T {}
+impl<T: GenericClient + Send + Sync> AsyncMigrate for T {}
