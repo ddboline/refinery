@@ -3,7 +3,7 @@ use crate::Migration;
 use async_trait::async_trait;
 use chrono::{DateTime, Local};
 use tokio_postgres::error::Error as PgError;
-use tokio_postgres::{Client, Transaction as PgTransaction};
+use tokio_postgres::{GenericClient, Transaction as PgTransaction};
 
 async fn query_applied_migrations(
     transaction: &PgTransaction<'_>,
@@ -32,7 +32,10 @@ async fn query_applied_migrations(
 }
 
 #[async_trait]
-impl AsyncTransaction for Client {
+impl<T> AsyncTransaction for T
+where
+    T: GenericClient,
+{
     type Error = PgError;
 
     async fn execute(&mut self, queries: &[&str]) -> Result<usize, Self::Error> {
@@ -48,7 +51,10 @@ impl AsyncTransaction for Client {
 }
 
 #[async_trait]
-impl AsyncQuery<Vec<Migration>> for Client {
+impl<T> AsyncQuery<Vec<Migration>> for T
+where
+    T: GenericClient,
+{
     async fn query(
         &mut self,
         query: &str,
@@ -60,4 +66,4 @@ impl AsyncQuery<Vec<Migration>> for Client {
     }
 }
 
-impl AsyncMigrate for Client {}
+impl<T: GenericClient> AsyncMigrate for T {}
